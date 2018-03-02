@@ -1,0 +1,28 @@
+version: '3'
+services:
+  db:
+    image: postgres
+    ports:
+      - "5432"
+  backend:
+    build:
+      context: autheg-backend
+      args:
+        UID: ${UID:-1001}
+    volumes:
+      - ./autheg-backend:/usr/src/app
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    user: rails
+  frontend:
+    build:
+      context: autheg-frontend
+      args:
+        UID: ${UID:-1001}
+    volumes:
+      - ./autheg-frontend:/usr/src/app
+    ports:
+      - "3000:3000"
+    user: frontend
