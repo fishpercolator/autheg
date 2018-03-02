@@ -82,3 +82,128 @@ Restart docker-compose
 Visit http://localhost:3000 to see your example rendered. Try adding a row in the DB and see it reflected in the frontend.
 
 Time to commit to version control!
+
+## Add user authentication with devise-jwt
+
+### Installation
+
+Add 'devise' and 'devise-jwt' to Gemfile and
+docker-compose run -u root backend bundle
+
+docker-compose run backend bash
+> rails g devise:install
+> rails g devise user
+
+Install devise-jwt:
+
+Add secrets to secrets.yml (jwt_secret, exactly like secret_key_base).
+
+Add this to devise.rb:
+
+```ruby
+config.jwt do |jwt|
+  jwt.secret = Rails.application.secrets.jwt_secret
+end
+```
+
+Create a blacklist for logging out:
+
+> rails g model jwt_blacklist jti:string:index exp:datetime
+
+(be sure to add null: false to each column in the generated migration, and delete the timestamps)
+
+in jwt_blacklist.rb:
+
+```ruby
+include Devise::JWT::RevocationStrategies::Blacklist
+```
+
+in user.rb:
+
+```ruby
+devise :database_authenticatable, :registerable,
+       :recoverable, :rememberable, :trackable, :validatable,
+       :jwt_authenticatable, jwt_revocation_strategy: JwtBlacklist
+```
+
+> rails db:migrate
+
+In routes.rb, move the 'devise_for' into our api scope.
+
+OK. Let's create a user and then try logging them in:
+
+> rails c
+>> User.create!(email: 'test@example.com', password: 'password')
+
+Restart docker-compose.
+
+Try POSTing to http://localhost:8080/api/users/sign_in with:
+
+```json
+{"user": {"email": "test@example.com", "password": "password"}}
+```
+
+you should get back a response with an Authorization header containing a signed JWT.
+
+That JWT header would be enough to sign users in on some frontends, but @nuxtjs/auth needs the token to be in the body of the response, and it also needs a method for reading the logged-in user data from the server.
+
+First, be sure to uncomment jbuilder and
+docker-compose run -u root backend bundle
+
+Let's override the SessionsController:
+
+> rails g controller sessions
+
+```ruby
+class SessionsController < Devise::SessionsController
+  def create
+    super { @token = current_token }
+  end
+
+  def show
+  end
+
+  private
+
+  def current_token
+    request.env['warden-jwt_auth.token']
+  end
+end
+```
+
+app/views/devise/sessions/create.json.jbuilder:
+```ruby
+json.token @token
+```
+
+app/views/devise/sessions/show.json.jbuilder:
+```ruby
+if user_signed_in?
+  json.(current_user, :id, :email)
+end
+```
+
+and in routes.rb:
+
+```ruby
+devise_for :users, controllers: {sessions: 'sessions'}
+devise_scope :user do
+  get 'users/current', to: 'sessions#show'
+end
+```
+
+Restart docker-compose and then try these methods out. Do the earlier POST and this time the token should come back in the response.
+
+Now you should be able to make a GET request to http://localhost:8080/api/users/current with that token in the headers (Authorization: Bearer <token>) and get back your user's email address.
+
+Finally, you should be able to send a DELETE request to http://localhost:8080/api/users/sign_out with that header to blacklist the token. After which you will not be able to use it for the GET request any more (it will return an empty object).
+
+Last thing - let's make the /examples method fail for unauthorized users. Add this to the ExamplesController:
+
+```ruby
+before_action :authenticate_user!
+```
+
+Now you should only be able to call that API method if you attach a valid JWT header.
+
+All working? Time to save to version control!
