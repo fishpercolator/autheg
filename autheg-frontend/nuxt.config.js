@@ -34,5 +34,13 @@ module.exports = {
         })
       }
     }
+  },
+  modules: [
+    '@nuxtjs/axios'
+  ],
+  axios: {
+    host: 'localhost',
+    port: 8080,
+    prefix: '/api'
   }
 }

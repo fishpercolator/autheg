@@ -25,3 +25,60 @@ docker-compose run backend rails db:create
 docker-compose up
 
 Check you can access the two environments at http://localhost:8080 and http://localhost:3000
+
+Woop! Time to commit to version control!
+
+## Getting the two talking to each other
+
+### Add an example API method
+
+docker-compose run backend bash
+> rails g resource example name:string colour:string
+> rails db:migrate
+> rails c
+> > {"foo" => "green", "bar" => "red", "baz" => "purple"}.each {|n,c| Example.create!(name: n, colour: c)}
+
+Move the route into api/json scope in routes.rb
+
+Add an index method to ExamplesController:
+
+```ruby
+def index
+  examples = Example.all.select(:id, :name, :colour)
+  render json: examples
+end
+```
+
+Visit http://localhost:8080/api/examples to check it's working.
+
+### Add a frontend view for that method
+
+docker-compose run frontend yarn add @nuxtjs/axios
+
+Add some config to nuxt.config.js:
+
+```javascript
+modules: [
+  '@nuxtjs/axios'
+],
+axios: {
+  host: 'localhost',
+  port: 8080,
+  prefix: '/api'
+},
+```
+
+Replace index.vue with the version from this git checkin.
+
+http://localhost:3000 will give a CORS error.
+
+Add 'rack-cors' to Gemfile and
+docker-compose run -u root backend bundle
+
+Uncomment cors.rb and change example.com to localhost:3000
+
+Restart docker-compose
+
+Visit http://localhost:3000 to see your example rendered. Try adding a row in the DB and see it reflected in the frontend.
+
+Time to commit to version control!
