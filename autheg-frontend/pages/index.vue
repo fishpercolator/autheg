@@ -1,14 +1,16 @@
 <template>
-  <section class="container">
-    <div class="example" v-for="example in examples" :key="example.id" :style="`color:${example.colour}`">
-      {{example.name}}
-    </div>
-    <p><router-link to="/login">Auth</router-link></p>
-  </section>
+  <v-layout>
+    <v-flex>
+      <v-list>
+        <v-list-tile v-for="example in examples" :key="example.id" :class="example.colour">
+          <v-list-tile-content>{{example.name}}</v-list-tile-content>
+        </v-list-tile>
+      </v-list>
+    </v-flex>
+  </v-layout>
 </template>
 
 <script>
-
 export default {
   middleware: ['auth'],
   data () {
@@ -26,11 +28,3 @@ export default {
   }
 }
 </script>
-
-<style>
-.example {
-  margin: 0.5em;
-  padding: 0.5em;
-  border: 1px solid currentColor;
-}
-</style>

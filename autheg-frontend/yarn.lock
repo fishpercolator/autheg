@@ -107,6 +107,12 @@
   dependencies:
     http-proxy-middleware "^0.17.4"
 
+"@nuxtjs/vuetify@^0.4.1":
+  version "0.4.1"
+  resolved "https://registry.yarnpkg.com/@nuxtjs/vuetify/-/vuetify-0.4.1.tgz#a81a8ed58cfde5e614c0e891411ce04acd7a0e34"
+  dependencies:
+    vuetify "^1.0.0"
+
 "@nuxtjs/youch@^4.2.3":
   version "4.2.3"
   resolved "https://registry.yarnpkg.com/@nuxtjs/youch/-/youch-4.2.3.tgz#36f8b22df5a0efaa81373109851e1d857aca6bed"
@@ -6234,6 +6240,10 @@ vue-template-es2015-compiler@^1.6.0:
 vue@^2.5.13:
   version "2.5.13"
   resolved "https://registry.yarnpkg.com/vue/-/vue-2.5.13.tgz#95bd31e20efcf7a7f39239c9aa6787ce8cf578e1"
+
+vuetify@^1.0.0:
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/vuetify/-/vuetify-1.0.5.tgz#10e83123a78c82e3d9c2efe6734b7f55ba678dd4"
 
 vuex@^3.0.1:
   version "3.0.1"
