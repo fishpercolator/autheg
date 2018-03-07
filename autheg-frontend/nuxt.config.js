@@ -36,11 +36,19 @@ module.exports = {
     }
   },
   modules: [
-    '@nuxtjs/axios'
+    '@nuxtjs/axios',
+    '@nuxtjs/auth'
   ],
   axios: {
     host: 'localhost',
     port: 8080,
     prefix: '/api'
+  },
+  auth: {
+    endpoints: {
+      login:  { url: '/users/sign_in' },
+      logout: { url: '/users/sign_out', method: 'delete' },
+      user:   { url: '/users/current' }
+    }
   }
 }

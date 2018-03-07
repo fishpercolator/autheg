@@ -179,7 +179,9 @@ json.token @token
 app/views/devise/sessions/show.json.jbuilder:
 ```ruby
 if user_signed_in?
-  json.(current_user, :id, :email)
+  json.user do
+    json.(current_user, :id, :email)
+  end
 end
 ```
 
@@ -207,3 +209,47 @@ before_action :authenticate_user!
 Now you should only be able to call that API method if you attach a valid JWT header.
 
 All working? Time to save to version control!
+
+### Hooking up the frontend
+
+Visiting your frontend now will result in an error (red flash) because the API method requires authentication.
+
+Install the @nuxtjs/auth library:
+
+> cd autheg-frontend
+> yarn add @nuxtjs/auth
+
+Add '@nuxjs/auth' to modules and a config section, such as:
+
+```javascript
+auth: {
+  endpoints: {
+    login:  { url: '/users/sign_in' },
+    logout: { url: '/users/sign_out', method: 'delete' },
+    user:   { url: '/users/current' }
+  }
+}
+```
+
+Enable the Vuex store to store the auth state (store/index.js):
+
+```javascript
+export default {
+  state: () => ({
+  })
+}
+```
+
+and restart docker-compose.
+
+Now create a pages/login.vue which uses the objects provided by this library.
+
+Finally, you'll want to redirect users who are not signed in and visit the homepage.
+
+Add to index.vue:
+
+```javascript
+middleware: ['auth'],
+```
+
+And that's it! Check out the [auth documentation](https://auth.nuxtjs.org/) and [demo apps](https://github.com/nuxt-community/auth-module/tree/dev/examples) for more examples and config.

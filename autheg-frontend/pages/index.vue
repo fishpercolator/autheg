@@ -3,12 +3,14 @@
     <div class="example" v-for="example in examples" :key="example.id" :style="`color:${example.colour}`">
       {{example.name}}
     </div>
+    <p><router-link to="/login">Auth</router-link></p>
   </section>
 </template>
 
 <script>
 
 export default {
+  middleware: ['auth'],
   data () {
     return {
       examples: []
