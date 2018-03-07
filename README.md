@@ -2,27 +2,27 @@
 
 ## Kicking off
 
-mkdir autheg
-cd autheg
-rails new autheg-backend -T --skip-spring -C -B -d postgresql --api
-vue init nuxt-community/starter-template autheg-frontend
-cd autheg-frontend
-yarn generate-lock-entry > yarn.lock
+    mkdir autheg
+    cd autheg
+    rails new autheg-backend -T --skip-spring -C -B -d postgresql --api
+    vue init nuxt-community/starter-template autheg-frontend
+    cd autheg-frontend
+    yarn generate-lock-entry > yarn.lock
 
 Add "export UID=$(id -u)" to ~/.zshrc
 
 Create docker-compose.yml, the two Dockerfiles and the two .dockerignore files + add vendor/bundle to the .gitignore
 [Explain these]
 
-docker-compose build
-docker-compose run -u root backend bundle
-docker-compose run frontend yarn
+    docker-compose build
+    docker-compose run -u root backend bundle
+    docker-compose run frontend yarn
 
 Edit database.yml (add host and username)
 Edit package.json (add HOST=0.0.0.0)
 
-docker-compose run backend rails db:create
-docker-compose up
+    docker-compose run backend rails db:create
+    docker-compose up
 
 Check you can access the two environments at http://localhost:8080 and http://localhost:3000
 
@@ -32,11 +32,11 @@ Woop! Time to commit to version control!
 
 ### Add an example API method
 
-docker-compose run backend bash
-> rails g resource example name:string colour:string
-> rails db:migrate
-> rails c
-> > {"foo" => "green", "bar" => "red", "baz" => "purple"}.each {|n,c| Example.create!(name: n, colour: c)}
+    docker-compose run backend bash
+    > rails g resource example name:string colour:string
+    > rails db:migrate
+    > rails c
+    > > {"foo" => "green", "bar" => "red", "baz" => "purple"}.each {|n,c| Example.create!(name: n, colour: c)}
 
 Move the route into api/json scope in routes.rb
 
@@ -53,7 +53,7 @@ Visit http://localhost:8080/api/examples to check it's working.
 
 ### Add a frontend view for that method
 
-docker-compose run frontend yarn add @nuxtjs/axios
+    docker-compose run frontend yarn add @nuxtjs/axios
 
 Add some config to nuxt.config.js:
 
@@ -88,11 +88,12 @@ Time to commit to version control!
 ### Installation
 
 Add 'devise' and 'devise-jwt' to Gemfile and
-docker-compose run -u root backend bundle
 
-docker-compose run backend bash
-> rails g devise:install
-> rails g devise user
+    docker-compose run -u root backend bundle
+
+    docker-compose run backend bash
+    > rails g devise:install
+    > rails g devise user
 
 Install devise-jwt:
 
@@ -108,7 +109,7 @@ end
 
 Create a blacklist for logging out:
 
-> rails g model jwt_blacklist jti:string:index exp:datetime
+    > rails g model jwt_blacklist jti:string:index exp:datetime
 
 (be sure to add null: false to each column in the generated migration, and delete the timestamps)
 
@@ -126,14 +127,14 @@ devise :database_authenticatable, :registerable,
        :jwt_authenticatable, jwt_revocation_strategy: JwtBlacklist
 ```
 
-> rails db:migrate
+    > rails db:migrate
 
 In routes.rb, move the 'devise_for' into our api scope.
 
 OK. Let's create a user and then try logging them in:
 
-> rails c
->> User.create!(email: 'test@example.com', password: 'password')
+    > rails c
+    >> User.create!(email: 'test@example.com', password: 'password')
 
 Restart docker-compose.
 
@@ -148,11 +149,12 @@ you should get back a response with an Authorization header containing a signed 
 That JWT header would be enough to sign users in on some frontends, but @nuxtjs/auth needs the token to be in the body of the response, and it also needs a method for reading the logged-in user data from the server.
 
 First, be sure to uncomment jbuilder and
-docker-compose run -u root backend bundle
+
+    docker-compose run -u root backend bundle
 
 Let's override the SessionsController:
 
-> rails g controller sessions
+    > rails g controller sessions
 
 ```ruby
 class SessionsController < Devise::SessionsController
@@ -216,8 +218,8 @@ Visiting your frontend now will result in an error (red flash) because the API m
 
 Install the @nuxtjs/auth library:
 
-> cd autheg-frontend
-> yarn add @nuxtjs/auth
+    cd autheg-frontend
+    yarn add @nuxtjs/auth
 
 Add '@nuxjs/auth' to modules and a config section, such as:
 
